@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script
+	  src="https://code.jquery.com/jquery-3.6.0.js"
+	  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+	  crossorigin="anonymous"></script>
+  	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Cats Viewer</title>
+</head>
+<body>
+    <h1>{{test}}</h1>
+    <h1>Visor de gatos</h1>
+    <div class="row">
+    	<img src="" id="cat-preview" width="300">
+    </div>
+    <div class="row">
+    	<button class="btn btn-sm btn-success mr-1" id="get-image">Consultar imagen</button>
+    	<button class="btn btn-sm btn-info" id="save-image">Guardar imagen</button>
+    </div>
+    <div class="row">
+    	<div class="list-group mt-3">
+			{% for cat in cats %}
+			{% if cat.image_url %}
+				<a href="#" class="list-group-item list-group-item-action">
+				    <span>Gato {{forloop.counter}}</span>
+				    <img src="{{cat.image_url}}" width="50">
+				  </a>
+			{% endif %}
+				
+			{% endfor %}
+		  
+
+		</div>
+	</div>
+
+    
+</body>
+
+<script type="text/javascript">
+	$(document).on('click', '#get-image', function (e) {
+		// $.ajax({
+	 //      type: "GET",
+	 //      url: "https://api.thecatapi.com/v1/images/search",
+	 //      success: function(resp){
+	 //        console.log(resp);
+	        
+	 //      }
+	 //    }); //fin ajax
+	 axios.get('https://api.thecatapi.com/v1/images/search')
+	  .then(function (response) {
+	    // handle success
+	    console.log(response);
+	    if(response.status !== 200) {
+	    	alert('error del servidor')
+	    } else {
+	    	img = $('#cat-preview').attr('src', response.data[0].url)
+	    }
+	  })
+	});
+
+	$(document).on('click', '#save-image', function (e) {
+	url = $('#cat-preview').attr('src')
+	if (!url) {
+		alert('debe cargar una imagen')
+		return
+	}
+	 axios({
+		  method: 'post',
+		  url: "{% url 'save_cat' %}" + "?url=" + url,
+		  data: {
+		    url
+		  },
+		  headers: {
+		    // "X-CSRFToken": CSRF_TOKEN, 
+		    "content-type": "application/json"
+		  }
+		})
+	  .then(function (response) {
+	    // handle success
+	    console.log(response);
+	    if(response.status !== 200) {
+	    	alert('error al guardar la imagen')
+	    } else {
+	    	location.reload();
+	    	alert('imagen guardada en la base de datos')
+	    }
+	  })
+	});
+	
+</script>
+
+</html>
+
